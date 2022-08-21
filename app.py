@@ -15,9 +15,10 @@ def do_cmd(cmd, value, it):
     Обрабатывает запрос при помощи Query.
     :param cmd: команда query
     :param value: аргумент команды query
-    :param it: list_iterator данные для обработки.
-    :return: list
+    :param it: данные для обработки.
+    :return: Iterable
     """
+
     if cmd == 'filter':
         cmd_res = filter(lambda record: value in record, it)
     elif cmd == 'map':
@@ -39,7 +40,7 @@ def do_cmd(cmd, value, it):
         cmd_res = it[:int(value)]
     else:
         raise BadRequest
-    return list(cmd_res)
+    return cmd_res
 
 
 def do_query(param):
@@ -52,7 +53,7 @@ def do_query(param):
         res = do_cmd(param['cmd1'], param['value1'], f)
         res = do_cmd(param['cmd2'], param['value2'], res)
 
-        return res
+        return list(res)
 
 
 @app.route("/perform_query", methods=['POST'])
