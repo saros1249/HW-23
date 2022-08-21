@@ -19,15 +19,15 @@ def do_cmd(cmd, value, it):
     :return: list
     """
     if cmd == 'filter':
-        cmd_res = list(filter(lambda record: value in record, it))
+        cmd_res = filter(lambda record: value in record, it)
     elif cmd == 'map':
         col_num = int(value)
         if col_num == 0:
-            cmd_res = list(map(lambda record: record.split()[col_num], it))
+            cmd_res = map(lambda record: record.split()[col_num], it)
         elif col_num == 1:
-            cmd_res = list(map(lambda record: record.split()[3] + record.split()[4], it))
+            cmd_res = map(lambda record: record.split()[3] + record.split()[4], it)
         elif col_num == 2:
-            cmd_res = list(map(lambda record: ' '.join(record.split()[5:]), it))
+            cmd_res = map(lambda record: ' '.join(record.split()[5:]), it)
         else:
             raise BadRequest
     elif cmd == 'unique':
@@ -39,7 +39,7 @@ def do_cmd(cmd, value, it):
         cmd_res = it[:int(value)]
     else:
         raise BadRequest
-    return cmd_res
+    return list(cmd_res)
 
 
 def do_query(param):
@@ -49,17 +49,10 @@ def do_query(param):
     :return: list
     """
     with open(os.path.join(DATA_DIR, param['file_name'])) as f:
-        file_data = f.readlines()
-
-    res = iter(file_data)
-
-    if 'cmd1' in param.keys():
-        res = do_cmd(param['cmd1'], param['value1'], res)
-
-    if 'cmd2' in param.keys():
+        res = do_cmd(param['cmd1'], param['value1'], f)
         res = do_cmd(param['cmd2'], param['value2'], res)
 
-    return res
+        return res
 
 
 @app.route("/perform_query", methods=['POST'])
