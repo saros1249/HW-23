@@ -1,4 +1,5 @@
 import os
+import re
 
 from flask import Flask, request, jsonify
 from werkzeug.exceptions import BadRequest
@@ -9,33 +10,33 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
 
-def do_cmd(cmd, value, data):
+def do_cmd(cmd, value, it):
     """
     Обрабатывает запрос при помощи Query.
     :param cmd: команда query
     :param value: аргумент команды query
-    :param data: list данные для обработки.
+    :param it: list_iterator данные для обработки.
     :return: list
     """
     if cmd == 'filter':
-        cmd_res = list(filter(lambda record: value in record, data))
+        cmd_res = list(filter(lambda record: value in record, it))
     elif cmd == 'map':
         col_num = int(value)
         if col_num == 0:
-            cmd_res = list(map(lambda record: record.split()[col_num], data))
+            cmd_res = list(map(lambda record: record.split()[col_num], it))
         elif col_num == 1:
-            cmd_res = list(map(lambda record: record.split()[3] + record.split()[4], data))
+            cmd_res = list(map(lambda record: record.split()[3] + record.split()[4], it))
         elif col_num == 2:
-            cmd_res = list(map(lambda record: ' '.join(record.split()[5:]), data))
+            cmd_res = list(map(lambda record: ' '.join(record.split()[5:]), it))
         else:
             raise BadRequest
     elif cmd == 'unique':
-        cmd_res = list(set(data))
+        cmd_res = list(set(it))
     elif cmd == 'sort':
         reverse = (value == 'desc')
-        cmd_res = sorted(data, reverse=reverse)
+        cmd_res = sorted(it, reverse=reverse)
     elif cmd == 'limit':
-        cmd_res = data[:int(value)]
+        cmd_res = it[:int(value)]
     else:
         raise BadRequest
     return cmd_res
@@ -50,7 +51,7 @@ def do_query(param):
     with open(os.path.join(DATA_DIR, param['file_name'])) as f:
         file_data = f.readlines()
 
-    res = file_data
+    res = iter(file_data)
 
     if 'cmd1' in param.keys():
         res = do_cmd(param['cmd1'], param['value1'], res)
